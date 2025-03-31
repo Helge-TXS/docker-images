@@ -63,7 +63,7 @@ Before you build the image make sure that you have provided the installation bin
 
     [oracle@localhost dockerfiles]$ ./buildContainerImage.sh -h
     
-    Usage: buildContainerImage.sh -v [version] -t [image_name:tag] [-e | -s | -x | -f] [-i] [-p] [-b] [-o] [container build option]
+    Usage: buildContainerImage.sh -v [version] -t [image_name:tag] [-e | -s | -x | -f] [-i] [-p] [-u [release_update.zip]] [-b] [-o] [container build option]
     Builds a container image for Oracle Database.
     
     Parameters:
@@ -76,6 +76,7 @@ Before you build the image make sure that you have provided the installation bin
        -f: creates image based on Database 'Free'
        -i: ignores the MD5 checksums
        -p: creates and extends image using the patching extension
+       -u: passes filename of release update 
        -b: build base stage only (Used by extensions)
        -o: passes on container build option
     
@@ -99,7 +100,7 @@ You can set the character set for the Standard Edition 2 and Enterprise Edition 
 #### Building 19c Container Images Based on Oracle Linux 9  
 
 The creation of Oracle 19c has been migrated to Oracle Linux 9.  
-For this, **ORACLE_HOME** must be patched to a release update **≥ 19.22** before installation (Oracle Document ID **2760289.1**).  
+For this, **ORACLE_HOME** must be patched to a release update **≥ 19.22** before installation ([Doc ID **2760289.1**](https://support.oracle.com/epmos/faces/DocContentDisplay?id=2760289.1)).  
 
 ##### Required Files  
 
@@ -110,11 +111,13 @@ To achieve this, two additional ZIP files must be copied into the directory cont
 
 ##### Finding the Required Patches  
 
-- The **release patch** can be found in the **Primary Note for Database Quarterly Release Updates (Doc ID 888.1)**.  
+- The **release patch** can be found in the **Primary Note for Database Quarterly Release Updates ([Doc ID 888.1](https://support.oracle.com/epmos/faces/DocContentDisplay?id=888.1))**.  
   - It is listed under **RU (Release Update)** in the section **DATABASE RELEASE UPDATE 19.xx.0.0.0**.  
+  - The release patch filename is passed to the **buildContainerImage.sh** script by the -u option.
+    The default is p37260974_190000_Linux-x86-64.zip (19.26)
 
-- The **latest OPatch patch** can be found in **How To Download And Install The Latest OPatch (6880880) Version (Doc ID 274526.1)**.  
-  - The **Linux x86-64** version should be selected in each case.  
+- The **latest OPatch patch** can be found in **How To Download And Install The Latest OPatch (6880880) Version ([Doc ID 274526.1](https://support.oracle.com/epmos/faces/DocContentDisplay?id=274526.1))**.  
+The **Linux-x86-64** version should be selected in each case.  
 
 #### Building patched container images
 
