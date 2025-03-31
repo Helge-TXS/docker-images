@@ -12,7 +12,7 @@
 usage() {
   cat << EOF
 
-Usage: buildContainerImage.sh -v [version] -t [image_name:tag] [-e | -s | -x | -f] [-i] [-p] [-b] [-o] [container build option]
+Usage: buildContainerImage.sh -v [version] -t [image_name:tag] [-e | -s | -x | -f] [-i] [-p] [-u [release_update.zip]] [-b] [-o] [container build option]
 Builds a container image for Oracle Database.
 
 Parameters:
@@ -25,6 +25,7 @@ Parameters:
    -f: creates images based on Database 'Free' 
    -i: ignores the MD5 checksums
    -p: creates and extends image using the patching extension
+   -u: passes filename of release update 
    -b: build base stage only (Used by extensions)
    -o: passes on container build option
 
@@ -123,13 +124,15 @@ MIN_DOCKER_VERSION="17.09"
 MIN_PODMAN_VERSION="1.6.0"
 DOCKERFILE="Dockerfile"
 IMAGE_NAME=""
+OPATCH_UPDATE_FILE="p6880880_190000_Linux-x86-64.zip"
+RELEASE_UPDATE_FILE="p37260974_190000_Linux-x86-64.zip"
 
 if [ "$#" -eq 0 ]; then
   usage;
   exit 1;
 fi
 
-while getopts "hesxfiv:t:o:pb" optname; do
+while getopts "hesxfiv:t:o:pbu:" optname; do
   case "${optname}" in
     "h")
       usage
@@ -152,6 +155,9 @@ while getopts "hesxfiv:t:o:pb" optname; do
       ;;
     "p")
       PATCHING=1
+      ;;
+    "u")
+      RELEASE_UPDATE_FILE="${OPTARG}"
       ;;
     "b")
       BASE_ONLY=1
@@ -320,6 +326,8 @@ echo "Building image '${IMAGE_NAME}' ..."
 BUILD_START=$(date '+%s')
 "${CONTAINER_RUNTIME}" build --force-rm=true --no-cache=true \
       "${BUILD_OPTS[@]}" "${PROXY_SETTINGS[@]}" --build-arg DB_EDITION="${EDITION}" \
+       --build-arg OPATCH_UPDATE_FILE="${OPATCH_UPDATE_FILE}" \
+       --build-arg RELEASE_UPDATE_FILE="${RELEASE_UPDATE_FILE}" \
       -t "${IMAGE_NAME}" -f "${DOCKERFILE}" . || {
   echo ""
   echo "ERROR: Oracle Database container image was NOT successfully created."

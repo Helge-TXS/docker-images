@@ -4,6 +4,7 @@ Sample container build files to facilitate installation, configuration, and envi
 
 * [How to build and run](#how-to-build-and-run)
   * [Building Oracle Database container images](#building-oracle-database-container-images)
+    * [Building 19c Container Images Based on Oracle Linux 9](#building-19c-container-images-based-on-oracle-linux-9)
     * [Building patched container images](#building-patched-container-images)
     * [Building the container images using Podman](#building-the-container-images-using-podman)
   * [Running Oracle Database in a container](#running-oracle-database-in-a-container)
@@ -94,6 +95,26 @@ You may extend the image with your own Dockerfile and create the users and table
 
 The character set for the database is set during creating of the database. 11gR2 Express Edition supports only UTF-8.
 You can set the character set for the Standard Edition 2 and Enterprise Edition during the first run of your container and may keep separate folders containing different tablespaces with different character sets.
+
+#### Building 19c Container Images Based on Oracle Linux 9  
+
+The creation of Oracle 19c has been migrated to Oracle Linux 9.  
+For this, **ORACLE_HOME** must be patched to a release update **≥ 19.22** before installation (Oracle Document ID **2760289.1**).  
+
+##### Required Files  
+
+To achieve this, two additional ZIP files must be copied into the directory containing the **Dockerfile**:  
+
+1. The latest **release patch** for Oracle Database 19c  
+2. The latest **patch for OPatch**  
+
+##### Finding the Required Patches  
+
+- The **release patch** can be found in the **Primary Note for Database Quarterly Release Updates (Doc ID 888.1)**.  
+  - It is listed under **RU (Release Update)** in the section **DATABASE RELEASE UPDATE 19.xx.0.0.0**.  
+
+- The **latest OPatch patch** can be found in **How To Download And Install The Latest OPatch (6880880) Version (Doc ID 274526.1)**.  
+  - The **Linux x86-64** version should be selected in each case.  
 
 #### Building patched container images
 

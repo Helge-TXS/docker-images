@@ -49,11 +49,15 @@ sed -i -e "s|###ORACLE_BASE###|$ORACLE_BASE|g" "$INSTALL_DIR"/"$INSTALL_RSP" && 
 sed -i -e "s|###ORACLE_HOME###|$ORACLE_HOME|g" "$INSTALL_DIR"/"$INSTALL_RSP"
 
 # Install Oracle binaries
-cd "$ORACLE_HOME"       && \
-mv "$INSTALL_DIR"/"$INSTALL_FILE_1" "$ORACLE_HOME"/ && \
-unzip "$INSTALL_FILE_1" && \
-rm "$INSTALL_FILE_1"    && \
-"$ORACLE_HOME"/runInstaller -silent -force -waitforcompletion -responsefile "$INSTALL_DIR"/"$INSTALL_RSP" -ignorePrereqFailure && \
+# according to Doc ID 2982833.1 we have to use -applyRU on install
+PATCH_DIR=/opt/install/patches
+export CV_ASSUME_DISTID=OL7
+unzip -qo "$INSTALL_DIR"/"$INSTALL_FILE_1" -d "$ORACLE_HOME";
+rm -rf "${ORACLE_HOME}"/OPatch;
+unzip -qo "$INSTALL_DIR"/"$OPATCH_UPDATE_FILE" -d "$ORACLE_HOME";
+unzip -qo "$INSTALL_DIR"/"$RELEASE_UPDATE_FILE" -d "$PATCH_DIR";
+ru_patch=$(echo "${RELEASE_UPDATE_FILE##*/}" | cut -d_ -f1 | cut -dp -f2)
+"$ORACLE_HOME"/runInstaller -silent -force -waitforcompletion -responsefile "$INSTALL_DIR"/"$INSTALL_RSP" -ignorePrereqFailure  -applyRU $PATCH_DIR/$ru_patch && \
 cd "$HOME"
 
 if $SLIMMING; then

@@ -20,9 +20,9 @@
 #
 # Pull base image
 # ---------------
-ARG BASE_IMAGE=oraclelinux:7-slim
+ARG BASE_IMAGE=oraclelinux:9-slim
 # hadolint ignore=DL3006
-FROM ${BASE_IMAGE} as base
+FROM ${BASE_IMAGE} AS base
 
 # Labels
 # ------
@@ -39,6 +39,8 @@ LABEL "provider"="Oracle"                                               \
 # Argument to control removal of components not needed after db software installation
 ARG SLIMMING=true
 ARG INSTALL_FILE_1="LINUX.X64_193000_db_home.zip"
+ARG OPATCH_UPDATE_FILE="p6880880_190000_Linux-x86-64.zip"
+ARG RELEASE_UPDATE_FILE="p37260974_190000_Linux-x86-64.zip"
 
 # Environment variables required for this build (do NOT change)
 # -------------------------------------------------------------
@@ -46,6 +48,8 @@ ENV ORACLE_BASE=/opt/oracle \
     ORACLE_HOME=/opt/oracle/product/19c/dbhome_1 \
     INSTALL_DIR=/opt/install \
     INSTALL_FILE_1=$INSTALL_FILE_1 \
+    OPATCH_UPDATE_FILE=$OPATCH_UPDATE_FILE \
+    RELEASE_UPDATE_FILE=$RELEASE_UPDATE_FILE \
     INSTALL_RSP="db_inst.rsp" \
     CONFIG_RSP="dbca.rsp.tmpl" \
     PWD_FILE="setPassword.sh" \
@@ -105,13 +109,15 @@ FROM base AS builder
 ARG DB_EDITION
 
 # Copy DB install file
-COPY --chown=oracle:dba $INSTALL_FILE_1 $INSTALL_RSP $INSTALL_DB_BINARIES_FILE $INSTALL_DIR/
+COPY --chown=oracle:dba $INSTALL_FILE_1 $OPATCH_UPDATE_FILE $RELEASE_UPDATE_FILE $INSTALL_RSP $INSTALL_DB_BINARIES_FILE $INSTALL_DIR/
+#RUN chown oracle:dba $INSTALL_DIR
 
 # Install DB software binaries
 USER oracle
 RUN chmod ug+x "$INSTALL_DIR"/*.sh && \
     sync && \
-    "$INSTALL_DIR"/"$INSTALL_DB_BINARIES_FILE" $DB_EDITION
+    "$INSTALL_DIR"/"$INSTALL_DB_BINARIES_FILE" $DB_EDITION && \
+    rm -rf $ORACLE_HOME/.patch_storage $ORACLE_HOME/.opatchauto_storage
 
 
 
